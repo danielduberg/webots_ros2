@@ -15,6 +15,8 @@
 #ifndef ROS2_IMU_HPP
 #define ROS2_IMU_HPP
 
+#include <array>
+#include <random>
 #include <unordered_map>
 
 #include <webots/accelerometer.h>
@@ -46,6 +48,11 @@ namespace webots_ros2_driver {
     WbDeviceTag mAccelerometer;
 
     bool mIsEnabled;
+
+    std::random_device mRd{};
+    std::mt19937 mGen{};
+    std::array<double, 3> mBias{};
+    std::normal_distribution<> mNoiseDist{};
   };
 
 }  // namespace webots_ros2_driver

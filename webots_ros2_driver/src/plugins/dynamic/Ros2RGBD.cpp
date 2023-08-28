@@ -116,7 +116,7 @@ namespace webots_ros2_driver {
           idx = i + j * mWidth;
           x = depth_image[idx];
           y = -(i - mCenterX) * x / mFocalLengthX;
-          z = -(j - mCenterY) * x / mFocalLengthY;
+          z = -(j - mCenterY) * x / mFocalLengthX; // FIXME: What should this be?
 
           memcpy(data + idx * 5, &x, sizeof(float));
           memcpy(data + idx * 5 + 1, &y, sizeof(float));

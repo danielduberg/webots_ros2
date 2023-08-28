@@ -57,6 +57,24 @@ namespace webots_ros2_driver {
       enable();
       mIsEnabled = true;
     }
+
+    mGen = std::mt19937{std::random_device()()};
+
+    if (parameters.count("accelerometerBiasMin") && parameters.count("accelerometerBiasMax")) {
+      double min =  std::stod(parameters["accelerometerBiasMin"]);
+      double max =  std::stod(parameters["accelerometerBiasMax"]);
+
+      std::array const i  {-max, -min, min, max};
+      std::array const w  {1, 0, 1}; 
+      std::piecewise_constant_distribution bias_dist(std::begin(i), std::end(i), std::begin(w));
+      mBias = {bias_dist(mGen), bias_dist(mGen), bias_dist(mGen)};
+    }
+
+    if (parameters.count("accelerometerNoiseMean") && parameters.count("accelerometerNoiseStddev")) {
+      double mean =  std::stod(parameters["accelerometerNoiseMean"]);
+      double stddev =  std::stod(parameters["accelerometerNoiseStddev"]);
+      mNoiseDist = std::normal_distribution{mean, stddev};
+    }
   }
 
   void Ros2IMU::enable() {
@@ -102,9 +120,9 @@ namespace webots_ros2_driver {
     mMessage.header.stamp = mNode->get_clock()->now();
     if (mAccelerometer) {
       const double *values = wb_accelerometer_get_values(mAccelerometer);
-      mMessage.linear_acceleration.x = values[0];
-      mMessage.linear_acceleration.y = values[1];
-      mMessage.linear_acceleration.z = values[2];
+      mMessage.linear_acceleration.x = values[0] + mBias[0] + mNoiseDist(mGen);
+      mMessage.linear_acceleration.y = values[1] + mBias[1] + mNoiseDist(mGen);
+      mMessage.linear_acceleration.z = values[2] + mBias[2] + mNoiseDist(mGen);
     }
     if (mGyro) {
       const double *values = wb_gyro_get_values(mGyro);
