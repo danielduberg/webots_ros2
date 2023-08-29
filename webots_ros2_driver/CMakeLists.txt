@@ -215,6 +215,7 @@ pluginlib_export_plugin_description_file(${PROJECT_NAME} webots_ros2_rgbd.xml)
 
 # Install ROS 2 nodes
 install(PROGRAMS ${PROJECT_NAME}/ros2_supervisor.py
+  PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ
   DESTINATION lib/${PROJECT_NAME}
 )
 
