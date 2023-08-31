@@ -13,6 +13,24 @@ data_files.append(('share/' + package_name + '/worlds', [
 data_files.append(('share/' + package_name + '/resource', [
     'resource/mavic_webots.urdf'
 ]))
+data_files.append(('share/' + package_name + '/resource', [
+    'resource/Mavic2Pro.proto'
+]))
+data_files.append(('share/' + package_name + '/meshes', ['meshes/body.obj']))
+data_files.append(('share/' + package_name + '/meshes', ['meshes/body_lenses.obj']))
+data_files.append(('share/' + package_name + '/meshes', ['meshes/body_metal_parts.obj']))
+data_files.append(('share/' + package_name + '/meshes', ['meshes/camera_chassis.obj']))
+data_files.append(('share/' + package_name + '/meshes', ['meshes/camera_lens.obj']))
+data_files.append(('share/' + package_name + '/meshes', ['meshes/camera_pitch.obj']))
+data_files.append(('share/' + package_name + '/meshes', ['meshes/camera_yaw.obj']))
+data_files.append(('share/' + package_name + '/meshes', ['meshes/front_led.obj']))
+data_files.append(('share/' + package_name + '/meshes', ['meshes/helix_a.obj']))
+data_files.append(('share/' + package_name + '/meshes', ['meshes/helix_a_joint.obj']))
+data_files.append(('share/' + package_name + '/meshes', ['meshes/helix_a_plates.obj']))
+data_files.append(('share/' + package_name + '/meshes', ['meshes/helix_b.obj']))
+data_files.append(('share/' + package_name + '/meshes', ['meshes/helix_b_joint.obj']))
+data_files.append(('share/' + package_name + '/meshes', ['meshes/helix_b_plates.obj']))
+data_files.append(('share/' + package_name + '/textures', ['textures/fast_helix.png']))
 data_files.append(('share/' + package_name, ['package.xml']))
 
 
