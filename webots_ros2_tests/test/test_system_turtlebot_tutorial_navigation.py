@@ -29,6 +29,7 @@ from ament_index_python.packages import get_package_share_directory
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.actions import IncludeLaunchDescription
 from webots_ros2_tests.utils import TestWebots, initialize_webots_test
+from time import sleep
 
 
 @pytest.mark.rostest
@@ -38,7 +39,7 @@ def generate_test_description():
     # If ROS_DISTRO is rolling, skip the test as some required packages are missing (cf. ci_after_init.bash)
     # If ROS_DISTRO is iron, skip the test as the Navigation packages are not yet available.
     if 'ROS_DISTRO' in os.environ and os.environ['ROS_DISTRO'] != 'humble':
-        pytest.skip('ROS_DISTRO is rolling or iron, skipping this test')
+        pytest.skip('ROS_DISTRO is rolling or jazzy, skipping this test')
 
     # Webots
     turtlebot_webots = IncludeLaunchDescription(
@@ -84,7 +85,7 @@ class TestTurtlebotNavigationTutorial(TestWebots):
         goal_message.pose.pose.orientation.w = 0.928
         goal_action.wait_for_server()
         self.__node.get_logger().info('Server is ready, waiting 10 seconds to send goal position.')
-        self.wait_for_clock(self.__node, messages_to_receive=1000)
+        sleep(10)
         goal_action.send_goal_async(goal_message)
         self.__node.get_logger().info('Goal position sent.')
 
