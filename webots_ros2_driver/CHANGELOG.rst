@@ -2,14 +2,24 @@
 Changelog for package webots_ros2_driver
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2025.0.1 (2025-07-14)
+------------------
+* Replaces ament_target_dependencies with target_link_libraries.
+* Adds ROS Kilted Kaiju support.
+
+2023.1.3 (2024-08-07)
+------------------
+* Make webots_ros2_driver scripts executable.
+* Fixed the produced URDF to also contain joint limits necessary for ros2_control.
+
 2023.1.1 (2023-07-11)
 ------------------
-* Fixed RangeFinder activation to also check for point cloud subscriptions.
 * Added component remapping parameter to rename PROTO components.
 * Added deprecation message when declaring driver node in launch file.
 * Added animation_{start,stop}_recording services to Ros2Supervisor node.
 * Added /Ros2Supervisor namespace to Ros2Supervisor node.
 * Fixed Python plugin termination on SIGINT call or simulation ends.
+* Fixed RangeFinder activation to also check for point cloud subscriptions.
 
 2023.1.0 (2023-06-29)
 ------------------

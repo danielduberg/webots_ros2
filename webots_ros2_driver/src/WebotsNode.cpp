@@ -50,7 +50,9 @@ namespace webots_ros2_driver {
     gShutdownSignalReceived = true;
   }
 
-  WebotsNode::WebotsNode(std::string name) : Node(name), mPluginLoader(gPluginInterfaceName, gPluginInterface) {
+  WebotsNode::WebotsNode(std::string name, rclcpp::NodeOptions &options) :
+    Node(name, options),
+    mPluginLoader(gPluginInterfaceName, gPluginInterface) {
     mRobotDescriptionParam = this->declare_parameter<std::string>("robot_description", "");
     mSetRobotStatePublisher = this->declare_parameter<bool>("set_robot_state_publisher", false);
     if (mRobotDescriptionParam != "") {
@@ -183,7 +185,26 @@ namespace webots_ros2_driver {
       std::string prefix = "";
       std::string webotsUrdf = wb_robot_get_urdf(prefix.c_str());
       replaceUrdfNames(webotsUrdf);
-      setAnotherNodeParameter("robot_state_publisher", "robot_description", webotsUrdf);
+
+      // Add <ros2_control /> and other tags to the Webots generated URDF
+      const std::vector<std::string> tags = {"ros2_control", "webots"};
+      std::shared_ptr<tinyxml2::XMLDocument> webotsUrdfModelDocument = std::make_shared<tinyxml2::XMLDocument>();
+      webotsUrdfModelDocument->Parse(webotsUrdf.c_str());
+      tinyxml2::XMLElement *webotsRobotXMLElement = webotsUrdfModelDocument->FirstChildElement("robot");
+      tinyxml2::XMLElement *robotXMLElement = mRobotDescriptionDocument->FirstChildElement("robot");
+      if (!robotXMLElement)
+        throw std::runtime_error("Invalid URDF, it doesn't contain a <robot> tag");
+
+      for (tinyxml2::XMLElement *child = robotXMLElement->FirstChildElement(); child; child = child->NextSiblingElement())
+        if (std::find(tags.begin(), tags.end(), child->Name()) != tags.end())
+          webotsRobotXMLElement->InsertEndChild(child->DeepClone(webotsUrdfModelDocument.get()));
+
+      std::string expandedUrdf = "";
+      tinyxml2::XMLPrinter printer;
+      webotsUrdfModelDocument->Accept(&printer);
+      expandedUrdf = printer.CStr();
+
+      setAnotherNodeParameter("robot_state_publisher", "robot_description", expandedUrdf);
     }
 
     mStep = wb_robot_get_basic_time_step();

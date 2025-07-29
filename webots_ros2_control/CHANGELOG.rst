@@ -2,6 +2,16 @@
 Changelog for package webots_ros2_control
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2025.0.1 (2025-07-14)
+------------------
+* Replaces ament_target_dependencies with target_link_libraries.
+* Adds ROS Kilted Kaiju support.
+
+2023.1.3 (2024-08-07)
+------------------
+* Added support for the new `ros2_control` API affecting resource_manager and controller_manager.
+* Corrected the sign of the joint accelerations.
+
 2023.1.0 (2023-06-29)
 ------------------
 * Fixed component activation.

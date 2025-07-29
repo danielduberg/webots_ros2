@@ -1,4 +1,4 @@
-# Copyright 1996-2023 Cyberbotics Ltd.
+# Copyright 1996-2024 Cyberbotics Ltd.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -70,6 +70,7 @@ JAVA_FILES      = Accelerometer.java \
                   Pen.java \
                   PositionSensor.java \
                   Propeller.java \
+                  Proto.java \
                   Radar.java \
                   RadarTarget.java \
                   RangeFinder.java \
@@ -147,19 +148,19 @@ $(WRAPPER_OBJECT): $(WRAPPER)
 
 $(WRAPPER_OBJECT_ARM64): $(WRAPPER)
 	@echo "# compiling" $(notdir $^) "(arm64)"
-	$(CXX) -target arm64-apple-macos11 $(CFLAGS2) $(WEBOTS_INCLUDES) $(JAVA_INCLUDES) $< -o $@
+	$(CXX) -target arm64-apple-macos12 $(CFLAGS2) $(WEBOTS_INCLUDES) $(JAVA_INCLUDES) $< -o $@
 
 $(WRAPPER_OBJECT_X86_64): $(WRAPPER)
 	@echo "# compiling" $(notdir $^) "(x86_64)"
-	$(CXX) -target x86_64-apple-macos11 $(CFLAGS2) $(WEBOTS_INCLUDES) $(JAVA_INCLUDES) $< -o $@
+	$(CXX) -target x86_64-apple-macos12 $(CFLAGS2) $(WEBOTS_INCLUDES) $(JAVA_INCLUDES) $< -o $@
 
 $(OBJDIR)/arm64/lib$(LIBNAME).jnilib: $(WRAPPER_OBJECT_ARM64)
 	@echo "# linking" $(notdir $^) "(arm64)"
-	$(CXX) -target arm64-apple-macos11 $(CFLAGS1) $(JNILIB_FLAGS) -L$(WEBOTS_CONTROLLER_LIB_PATH) -lController -lCppController $^ -o "$@"
+	$(CXX) -target arm64-apple-macos12 $(CFLAGS1) $(JNILIB_FLAGS) -L$(WEBOTS_CONTROLLER_LIB_PATH) -lController -lCppController $^ -o "$@"
 
 $(OBJDIR)/x86_64/lib$(LIBNAME).jnilib: $(WRAPPER_OBJECT_X86_64)
 	@echo "# linking" $(notdir $^) "(x86_64)"
-	$(CXX) -target x86_64-apple-macos11 $(CFLAGS1) $(JNILIB_FLAGS) -L$(WEBOTS_CONTROLLER_LIB_PATH) -lController -lCppController $^ -o "$@"
+	$(CXX) -target x86_64-apple-macos12 $(CFLAGS1) $(JNILIB_FLAGS) -L$(WEBOTS_CONTROLLER_LIB_PATH) -lController -lCppController $^ -o "$@"
 
 $(WEBOTS_CONTROLLER_LIB_PATH)/java/lib$(LIBNAME).jnilib: $(OBJDIR)/arm64/lib$(LIBNAME).jnilib $(OBJDIR)/x86_64/lib$(LIBNAME).jnilib
 	@echo "# creating fat" $^
@@ -181,7 +182,7 @@ $(WEBOTS_CONTROLLER_LIB_PATH)/java/$(LIBNAME).dll: $(WRAPPER_OBJECT)
 
 $(JAR_FILE): $(WRAPPER)
 	@echo "# compiling java sources"
-	javac --release 8 $(SWIG_OUTPUT_PATH)/*.java -d .
+	javac --release 11 $(SWIG_OUTPUT_PATH)/*.java -d .
 	@echo "# creating   "$@
 	@mkdir -p $(WEBOTS_CONTROLLER_LIB_PATH)/java
 	jar cfv $(JAR_FILE) $(CONTROLLERPATH)/*.class > /dev/null

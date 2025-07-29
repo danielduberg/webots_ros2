@@ -3,20 +3,24 @@
 ROS_DISTRO=$1
 ROS_REPO=$2
 
-# Take the latest nightly build
-YESTERDAY_WEEK_DAY_NUMBER=`date --date="1 day ago" +"%u"`
-LAST_NIGHTLY_DAY_OLD=1
-# There is no nightly build the weekend
-if [ ${YESTERDAY_WEEK_DAY_NUMBER} -gt 5 ]; then
-    LAST_NIGHTLY_DAY_OLD="$((${YESTERDAY_WEEK_DAY_NUMBER}-4))"
-fi
-NIGHTLY_DATE=`date --date="${LAST_NIGHTLY_DAY_OLD} day ago" +"%-d_%-m_%Y"`
-WEBOTS_NIGHTLY_VERSION="nightly_${NIGHTLY_DATE}"
+WEBOTS_VERSION="R${WEBOTS_RELEASE_VERSION}"
 
-apt update
-apt install -y wget dialog apt-utils psmisc lsb-release git
-wget https://github.com/cyberbotics/webots/releases/download/${WEBOTS_NIGHTLY_VERSION}/webots_${WEBOTS_RELEASE_VERSION}_amd64.deb -O /tmp/webots.deb
-apt install -y /tmp/webots.deb xvfb
+if [ "${TEST_WITH_WEBOTS_NIGTHLY}" == "1" ]; then
+    # Take the latest nightly build
+    YESTERDAY_WEEK_DAY_NUMBER=`date --date="1 day ago" +"%u"`
+    LAST_NIGHTLY_DAY_OLD=1
+    # There is no nightly build the weekend
+    if [ ${YESTERDAY_WEEK_DAY_NUMBER} -gt 5 ]; then
+        LAST_NIGHTLY_DAY_OLD="$((${YESTERDAY_WEEK_DAY_NUMBER}-4))"
+    fi
+    NIGHTLY_DATE=`date --date="${LAST_NIGHTLY_DAY_OLD} day ago" +"%-d_%-m_%Y"`
+    WEBOTS_VERSION="nightly_${NIGHTLY_DATE}"
+fi
+
+apt update > /dev/null
+apt install -y wget dialog apt-utils psmisc lsb-release git > /dev/null
+wget https://github.com/cyberbotics/webots/releases/download/${WEBOTS_VERSION}/webots_${WEBOTS_RELEASE_VERSION}_amd64.deb -O /tmp/webots.deb > /dev/null
+apt install -y /tmp/webots.deb xvfb > /dev/null
 
 # OpenSSL patch for ubuntu 22
 if [[ $(lsb_release -rs) == "22.04" && ${WEBOTS_RELEASE_VERSION} == "2022a" ]]; then
@@ -37,20 +41,14 @@ fi
 
 # TODO: Revert once the https://github.com/ros-planning/navigation2/issues/3033 issue is fixed.
 # Fast-DDS is not working properly with the Nav2 package on Humble and Iron. Using Cyclone DDS instead.
-if [[ "${ROS_DISTRO}" != "rolling" ]]; then
-    apt install -y ros-${ROS_DISTRO}-rmw-cyclonedds-cpp
-fi
+apt install -y ros-${ROS_DISTRO}-rmw-cyclonedds-cpp
 
 # Setup Qt plugins for RViz (can be used once RViz does not randomly crash anymore in GitHub CI).
-#export QT_PLUGIN_PATH=/usr/lib/x86_64-linux-gnu/qt5/plugins
+# export QT_PLUGIN_PATH=/usr/lib/x86_64-linux-gnu/qt5/plugins
 
-# TODO: Remove once the https://packages.ubuntu.com/noble/python3-flake8 package version is updated.
-# Manually upgrade python3-flake8 to 7.0.0 for noble
-if [[ "${ROS_DISTRO}" == "rolling" ]]; then
-    apt install -y python3-flake8
-    wget http://ftp.ubuntu.com/ubuntu/ubuntu/pool/universe/p/pyflakes/python3-pyflakes_3.2.0-1_all.deb -P /tmp
-    dpkg -i /tmp/python3-pyflakes_3.2.0-1_all.deb
-    wget http://ftp.ubuntu.com/ubuntu/ubuntu/pool/universe/p/python-flake8/python3-flake8_7.0.0-1_all.deb -P /tmp
-    dpkg -i /tmp/python3-flake8_7.0.0-1_all.deb
-    apt --fix-broken install -y
+# HOTFIX: https://github.com/ros-controls/ros2_control/pull/1960
+if [[ "${ROS_DISTRO}" == "humble" ]]; then
+    wget -O /tmp/hotfix.deb http://snapshots.ros.org/humble/2024-08-28/ubuntu/pool/main/r/ros-humble-hardware-interface/ros-humble-hardware-interface_2.43.0-1jammy.20240823.145349_amd64.deb && \
+        apt install -y --allow-downgrades /tmp/hotfix.deb && \
+        rm -f /tmp/hotfix.deb
 fi

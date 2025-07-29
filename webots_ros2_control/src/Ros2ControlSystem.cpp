@@ -62,6 +62,14 @@ namespace webots_ros2_control {
       joint.velocity = NAN;
       joint.acceleration = NAN;
 
+      // Check if state interfaces have initial positions
+      for (hardware_interface::InterfaceInfo stateInterface : component.state_interfaces) {
+        if (stateInterface.name == "position" && !stateInterface.initial_value.empty()) {
+          joint.position = std::stod(stateInterface.initial_value);
+          wb_motor_set_position(joint.motor, std::stod(stateInterface.initial_value));
+        }
+      }
+
       // Configure the command interface
       for (hardware_interface::InterfaceInfo commandInterface : component.command_interfaces) {
         if (commandInterface.name == "position")
@@ -90,6 +98,16 @@ namespace webots_ros2_control {
     }
     return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
   }
+#if HARDWARE_INTERFACE_VERSION_MAJOR > 5 || (HARDWARE_INTERFACE_VERSION_MAJOR == 5 && HARDWARE_INTERFACE_VERSION_MINOR >= 3)
+  rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn Ros2ControlSystem::on_init(
+    const hardware_interface::HardwareComponentInterfaceParams &params) {
+    if (hardware_interface::SystemInterface::on_init(params) !=
+        rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS) {
+      return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::ERROR;
+    }
+    return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
+  }
+#endif
 
   std::vector<hardware_interface::StateInterface> Ros2ControlSystem::export_state_interfaces() {
     std::vector<hardware_interface::StateInterface> interfaces;
@@ -145,7 +163,7 @@ namespace webots_ros2_control {
         const double velocity = std::isnan(joint.position) ? NAN : (position - joint.position) / deltaTime;
 
         if (!std::isnan(joint.velocity))
-          joint.acceleration = (joint.velocity - velocity) / deltaTime;
+          joint.acceleration = (velocity - joint.velocity) / deltaTime;
         joint.velocity = velocity;
         joint.position = position;
       }
